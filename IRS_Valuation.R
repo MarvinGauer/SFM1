@@ -2,55 +2,72 @@
 ######## SFM1 - Project -> Compare the three different ways to value an IRS
 ############################################################################
 
+# clear all variables
+rm(list = ls(all = TRUE))
+graphics.off()
+
+# install and load packages
+libraries = c("ggplot2")
+lapply(libraries, function(x) 
+  if (!(x %in% installed.packages())) {
+    install.packages(x) 
+  }
+)
+lapply(libraries, library, quietly = TRUE, character.only = TRUE)
+
 ######## 1. Input Parameters
 
-Rfix = 0.08 # Fix Rate
-Rflex = 0.102 # Flexible Rate (usually LIBOR)
-Comp = 2 # Compounding Frequency
+Rfix = 0.075 # Fix Rate
 
-y = matrix(c(0.25,0.75,1.25,0.1,0.105,0.11),ncol=2,byrow = F) # zero-bond-yield-curve
+y = matrix(c(0,0.5,1,1.5,2,0,2*(1/0.97)-2,(1/0.94)-1,((1/0.91)-1)/3*2,((1/0.87)-1)/2),ncol=2,byrow = F) # zero-bond-yield-curve
 
-P = 100 # Principial
+P = 1 # Principial
 
 ######## 2. Valuation
 
-######## 2.1. Calculation Functions
+######## 2.1. Helper Functions
 
-Bfix = function(yields, CompFreq, Coupon_Anually, Principal){
+Bfix = function(yields, Coupon_Anually, P=1){
   
-  N = nrow(yields) #Number of Payments
-  C = (Coupon_Anually*Principal)/CompFreq # Coupon per Payment
-  CF = rep(C,N) # Cashflow Vector incl. Coupons
-  CF[length(CF)] = CF[length(CF)] + Principal # Cashflow Vector incl. Coupons and Principal
-  Discount = exp(-1 * yields[,1] * yields[,2]) # Discount Factors per Payment
-  BondPrice = Discount %*% CF
+  D = sapply(1:(nrow(yields)), function(x) (yields[x,2]*yields[x,1]+1)^(-1)) # Discountfactors
+  PayDiff = c(0,diff(yields[,1]))
+  BondPrice = D%*%(PayDiff*Coupon_Anually)+D[length(D)]
   
   return(BondPrice)
   
 }
 
-Bflex = function(yields, CompFreq, Rflex, Principal){
+FRA = function(Rfix,yields,Si,Ti,P=1){ # Si<Ti and both are the times of the yield
   
-  K = (Rflex*Principal)/CompFreq
-  CF = Principal + K
-  Discount = exp(-1 * yields[1] * yields[2])
-  Price = Discount %*% CF
+  DSi = ((yields[,2][yields[,1]==Si]*Si)+1)^(-1) # Discountfactor corresponding to Si
+  DTi = ((yields[,2][yields[,1]==Ti]*Ti)+1)^(-1) # Discountfactor corresponding to Ti
+  FRA = DTi*(Ti-Si)*Rfix+DTi-DSi # Price of the FRA
   
-  return(Price)
+  return(FRA)
 }
 
-#UNDER CONSTRUCTION
-FRA = function(Rfix,yields,Time1,Time2,P){
-  Rforward = yields[,2][yields[,1]==Time1]
+ForwardRates = function(yields,Si,Ti){ # Si<Ti and both are the times of the yield
+  
+  DSi = ((yields[,2][yields[,1]==Si]*Si)+1)^(-1) # Discountfactor corresponding to Si
+  DTi = ((yields[,2][yields[,1]==Ti]*Ti)+1)^(-1) # Discountfactor corresponding to Ti
+  FR = (1/(Ti-Si))*((DSi/DTi)-1)
+  
+  return(FR)
+  
 }
 
 ######## 2.2. Valuation in Terms of Bond Prizes
 
-VSwap = Bfix(y,Comp,Rfix,P) - Bflex(y[1,],Comp,Rflex,P)
+VSwapB = as.numeric(Bfix(y,Rfix,P) - 1)
 
 ######## 2.3. Valuation in Terms of FRA Prizes
 
-######## 2.4. Valuation in Terms of XXX Prizes
+VSwapFRA = sum(unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1])))) # Sumation of different FRAs
+
+######## 2.4. Valuation in Terms of Forward Rates
+
+VSwapR = as.numeric((sapply(2:(nrow(y)), function(x) (y[x,2]*y[x,1]+1)^(-1)) * diff(y[,1])) %*% (Rfix - sapply(1:(nrow(y)-1),function(x) ForwardRates(y,y[x,1],y[x+1,1]))))
 
 ######## 3. Results & Graphics
+
 
