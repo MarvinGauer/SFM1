@@ -19,9 +19,12 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 Rfix = 0.075 # Fix Rate
 
-y = matrix(c(0,0.5,1,1.5,2,0,2*(1/0.97)-2,(1/0.94)-1,((1/0.91)-1)/3*2,((1/0.87)-1)/2),ncol=2,byrow = F) # zero-bond-yield-curve
+Maturity = c(0,0.5,1,1.5,2)
+Yields = c(0,2*(1/0.97)-2,(1/0.94)-1,((1/0.91)-1)/3*2,((1/0.87)-1)/2)
 
-P = 1 # Principial
+y = data.frame(Maturity, Yields) # zero-bond-yield-curve
+
+P = 1 # Principal
 
 ######## 2. Valuation
 
@@ -70,4 +73,4 @@ VSwapR = as.numeric((sapply(2:(nrow(y)), function(x) (y[x,2]*y[x,1]+1)^(-1)) * d
 
 ######## 3. Results & Graphics
 
-
+data.frame("Bond"=VSwapB,"FRA"=VSwapFRA,"Forward Rate"=VSwapR)
