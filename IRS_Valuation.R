@@ -35,7 +35,7 @@ Bfix = function(yields, Coupon_Anually, P=1){
   
   D = sapply(1:(nrow(yields)), function(x) (yields[x,2]*yields[x,1]+1)^(-1)) # Discountfactors
   PayDiff = c(0,diff(yields[,1]))
-  BondPrice = D%*%(PayDiff*Coupon_Anually)+D[length(D)]
+  BondPrice = (D%*%(PayDiff*Coupon_Anually)+D[length(D)])*P
   
   return(BondPrice)
   
