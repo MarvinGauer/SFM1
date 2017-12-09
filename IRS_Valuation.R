@@ -72,17 +72,6 @@ VSwapFRA = sum(unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1
 
 VSwapR = as.numeric((sapply(2:(nrow(y)), function(x) (y[x,2]*y[x,1]+1)^(-1)) * diff(y[,1])) %*% (Rfix - sapply(1:(nrow(y)-1),function(x) ForwardRates(y,y[x,1],y[x+1,1]))))
 
-######## 3. Results & Graphics
+######## 3. Results
 
 data.frame("Bond"=VSwapB,"FRA"=VSwapFRA,"Forward Rate"=VSwapR)
-
-ggplot(data=data.frame(Maturity,Yields,"Forward"=c(0,sapply(1:(nrow(y)-1),function(x) ForwardRates(y,y[x,1],y[x+1,1]))))) + geom_line(aes(x=Maturity,y=Yields,color="darkred")) + geom_line(aes(x=Maturity,y=Forward,color="blue")) +
-  theme(legend.position = c(0.75,0.25),legend.justification = c(0, 1), panel.background = element_blank(),
-      axis.line.x = element_line(color = "black", 
-                                 arrow = arrow(length = unit(0.25, 
-                                                             "cm"))),
-      axis.line.y = element_line(color = "black", 
-                                 arrow = arrow(length = unit(0.25, 
-                                                             "cm")))) + 
-  scale_colour_discrete(name="Rate Type",breaks=c("blue", "darkred"), labels = c("Forward Rates", "Spot Rates"))
-  
