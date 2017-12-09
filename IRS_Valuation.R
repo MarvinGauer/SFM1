@@ -22,7 +22,6 @@ Rfix = 0.075 # Fix Rate
 Maturity = c(0,0.5,1,1.5,2)
 Yields = c(0,2*(1/0.97)-2,(1/0.94)-1,((1/0.91)-1)/3*2,((1/0.87)-1)/2)
 
-
 y = data.frame(Maturity, Yields) # zero-bond-yield-curve
 
 P = 1 # Principal
