@@ -27,6 +27,9 @@ Y = data.frame(maturity, yields) # zero-bond-yield-curve
 
 ######## 1. Plots
 
+# save the plot as a pdf
+pdf("Plots/USTreasuryYieldCurve.pdf", width = 10, height = 5)
+
 # US Treausry yield curve plot as of 8/12/17 
 ggplot(data=data.frame("Maturity"=maturity,"Yields"=yields,"Forward"=c(0,sapply(1:(nrow(Y)-1),function(x) ForwardRates(Y,Y[x,1],Y[x+1,1]))))) + geom_line(aes(x=maturity,y=yields,color="blue")) +
   theme(legend.position = c(0.75,0.25),legend.justification = c(0, 1), panel.background = element_blank(),
@@ -38,9 +41,14 @@ ggplot(data=data.frame("Maturity"=maturity,"Yields"=yields,"Forward"=c(0,sapply(
                                                                "cm")))) + 
   scale_colour_discrete(name="Rate Type",breaks=c("darkred","blue"), labels = c("Forward Rates", "Spot Rates"))
 
+dev.off()
+
+# save the plot as a pdf
+pdf("Plots/USTreasuryYieldCurveAndForwards.pdf", width = 10, height = 5)
+
 # US Treausry yield curve plot as of 8/12/17 incl. Forward Rates
 ggplot(data=data.frame("Maturity"=maturity,"Yields"=yields,"Forward"=c(0,sapply(1:(nrow(Y)-1),function(x) ForwardRates(Y,Y[x,1],Y[x+1,1]))))) + geom_line(aes(x=maturity,y=yields,color="blue")) + geom_line(aes(x=maturity,y=Forward,color="darkred")) +
-  theme(legend.position = c(0.75,0.25),legend.justification = c(0, 1), panel.background = element_blank(),
+  theme(text = element_text(size=15),legend.position = c(0.75,0.25),legend.justification = c(0, 1), panel.background = element_blank(),
         axis.line.x = element_line(color = "black", 
                                    arrow = arrow(length = unit(0.25, 
                                                                "cm"))),
@@ -48,3 +56,6 @@ ggplot(data=data.frame("Maturity"=maturity,"Yields"=yields,"Forward"=c(0,sapply(
                                    arrow = arrow(length = unit(0.25, 
                                                                "cm")))) + 
   scale_colour_discrete(name="Rate Type",breaks=c("darkred", "blue"), labels = c("Forward Rates", "Spot Rates"))
+
+dev.off()
+
