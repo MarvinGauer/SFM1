@@ -73,4 +73,7 @@ VSwapR = as.numeric((sapply(2:(nrow(y)), function(x) (y[x,2]*y[x,1]+1)^(-1)) * d
 
 ######## 3. Results
 
-data.frame("Bond"=VSwapB,"FRA"=VSwapFRA,"Forward Rate"=VSwapR)
+
+
+
+data.frame(Maturity = c(Maturity,"Results:"), "FRA Value" = c(0,unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1]))),VSwapFRA))
