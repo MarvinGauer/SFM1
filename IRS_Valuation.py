@@ -3,6 +3,9 @@
 import numpy as np
 import matplotlib as mpl
 import pandas as pd
+import plotly.offline as offline
+import plotly.plotly as py
+import plotly.graph_objs as go
 
 
 ######## 1.Input Parameters
@@ -86,3 +89,38 @@ VSwapR = sum(DCF)
 
 
 ######## 3. Results
+
+Maturity_tab    = Maturity + ['<b>RESULTS:</b>']
+FixBondCashFlow = list(Bfix(y,Rfix,P)[1]) + [Bfix(y,Rfix,P)[0]]
+FloatRateNote   = [P] + list(np.repeat('',len(Maturity)-1)) + [P]
+BondBasedVal    = list(np.repeat('',len(Maturity))) + [Bfix(y,Rfix,P)[0]-P]
+FRAVal          = pd.Series(list(np.arange(0,len(y[0])-1))).apply(lambda x: FRA(Rfix,y,y[0][x],y[0][x+1],P))
+FRAVal          = [0] + FRAVal.tolist() + [VSwapFRA]
+DCF_tab         = DCF + [sum(DCF)]
+
+values = [Maturity_tab, FixBondCashFlow, FloatRateNote, BondBasedVal, FRAVal, DCF_tab]
+
+trace0 = go.Table(
+  type = 'table',
+  header = dict(
+    values = [['<b>Maturity</b>'],
+              ['<b>Fixed Bond Cash Flows</b>'],
+              ['<b>Floating Rate Note</b>'],
+              ['<b>Bond based Value</b>'],
+              ['<b>FRA Value</b>'],
+              ['<b>DCF</b>']],
+    fill = dict(color = '#506784'),
+    align = ['center'],
+    font = dict(color = 'white', size = 12)
+  ),
+  cells = dict(
+    values = values,
+    fill = dict(color = [list(np.repeat('white',len(Maturity))) + ['lightgrey']]),
+    align = ['center'],
+    height = 30,
+    font = dict(color = '#506784', size = 12)
+    ))
+
+data = [trace0]
+
+offline.plot(data, filename = "Results IRS Valuation")
