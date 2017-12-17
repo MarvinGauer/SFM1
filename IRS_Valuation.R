@@ -86,7 +86,7 @@ Results = data.frame("Maturity" = c(Maturity,"Results:"),
                      "FRA Value" = c(0,unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1],P))),VSwapFRA),
                      "DCF" = c(DCF,sum(DCF)))
 
-g <- tableGrob(head(Results), theme = ttheme_minimal(), rows = NULL)
+g <- tableGrob(head(Results,n=nrow(Results)), theme = ttheme_minimal(), rows = NULL)
 separators <- replicate(ncol(g) - 1,
                         segmentsGrob(x1 = unit(0, "npc"), gp=gpar(lty=2)),
                         simplify=FALSE)
