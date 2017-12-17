@@ -80,11 +80,12 @@ VSwapR = sum(DCF)
 ######## 3. Results
 
 Results = data.frame("Maturity" = c(Maturity,"Results:"), 
-                     "Fixed Bond Cash Flows" = c(Bfix(y,Rfix,P)$PV,Bfix(y,Rfix,P)$BondPrice) ,
+                     "Fixed Bond Cash Flows" = round(c(Bfix(y,Rfix,P)$PV,Bfix(y,Rfix,P)$BondPrice),5) ,
                      "Floating Rate Note" = c(P, rep("",length(Maturity)-1), P) , 
-                     "Bond based Value" = c(rep("",length(Maturity)),Bfix(y,Rfix,P)$BondPrice - P),
-                     "FRA Value" = c(0,unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1],P))),VSwapFRA),
-                     "DCF" = c(DCF,sum(DCF)))
+                     "Bond based Value" = c(rep("",length(Maturity)),round(Bfix(y,Rfix,P)$BondPrice - P,5)),
+                     "FRA Value" = round(c(0,unlist(lapply(1:(nrow(y)-1),function(x) FRA(Rfix,y,y[x,1],y[x+1,1],P))),VSwapFRA),5),
+                     "DCF" = round(c(DCF,sum(DCF)),5))
+
 
 g <- tableGrob(head(Results,n=nrow(Results)), theme = ttheme_minimal(), rows = NULL)
 separators <- replicate(ncol(g) - 1,
