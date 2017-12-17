@@ -29,7 +29,7 @@ def Bfix(yields, Coupon_Anually, P):
     Coupon_Anually = float(Coupon_Anually)
     P = float(P)    
     
-    D = list(map(lambda x: (yields[1][x]*yields[0][x]+1)**(-1),range(len(yields[0]))))   
+    D = list(map(lambda x: (yields[1][x]*yields[0][x]+1)**(-1), range(len(yields[0]))))   
     PayDiff = list(np.diff(yields[0]))
     PayDiff.insert(0,0)
     PayDiff = [x*Coupon_Anually for x in PayDiff]
@@ -37,7 +37,6 @@ def Bfix(yields, Coupon_Anually, P):
     
     NPVs = [x*y*P for x,y in zip(D,PayDiff)]
     NPVs[len(NPVs)-1] =  NPVs[len(NPVs)-1] + D[len(D)-1]*P
-    
     
     return(BondPrice,NPVs)
 
@@ -73,13 +72,13 @@ VSwapB = float(Bfix(y,Rfix,P)[0] - P)
 
 ######## 2.3. Valuation in Terms of FRA Prizes
 
-VSwapFRA = sum(list(map(lambda x: FRA(Rfix,y,y[0][x],y[0][x+1],P),range(len(y[0])-1))))
+VSwapFRA = sum(list(map(lambda x: FRA(Rfix,y,y[0][x],y[0][x+1],P), range(len(y[0])-1))))
 
 ######## 2.4. Valuation in Terms of Forward Rates
 
-ERate = [x-y for x,y in zip([Rfix]*(len(y[0])-1), list(map(lambda x: ForwardRates(y,y[0][x],y[0][x+1]),range(len(y[0])-1))) )]
+ERate = [x-y for x,y in zip([Rfix]*(len(y[0])-1), list(map(lambda x: ForwardRates(y,y[0][x],y[0][x+1]), range(len(y[0])-1))) )]
 L = list(np.diff(y[0]))
-D = list(map(lambda x: (y[0][x]*y[1][x]+1)**(-1),range(len(y[0]))))[1:]
+D = list(map(lambda x: (y[0][x]*y[1][x]+1)**(-1), range(len(y[0]))))[1:]
 
 DCF = [x*y*z for x,y,z in zip(ERate,L,D)]
 DCF.insert(0,0)
@@ -91,12 +90,12 @@ VSwapR = sum(DCF)
 ######## 3. Results
 
 Maturity_tab    = Maturity + ['<b>RESULTS:</b>']
-FixBondCashFlow = list(Bfix(y,Rfix,P)[1]) + [Bfix(y,Rfix,P)[0]]
-FloatRateNote   = [P] + list(np.repeat('',len(Maturity)-1)) + [P]
-BondBasedVal    = list(np.repeat('',len(Maturity))) + [Bfix(y,Rfix,P)[0]-P]
-FRAVal          = pd.Series(list(np.arange(0,len(y[0])-1))).apply(lambda x: FRA(Rfix,y,y[0][x],y[0][x+1],P))
-FRAVal          = [0] + FRAVal.tolist() + [VSwapFRA]
-DCF_tab         = DCF + [sum(DCF)]
+FixBondCashFlow = list(map(lambda x: round(x, 6), list(Bfix(y, Rfix, P)[1]) + [Bfix(y, Rfix, P)[0]]))
+FloatRateNote   = [P] + list(np.repeat('', len(Maturity)-1)) + [P]
+BondBasedVal    = list(np.repeat('', len(Maturity))) + [round(Bfix(y, Rfix, P)[0] - P, 6)]
+FRAVal          = pd.Series(list(np.arange(0, len(y[0])-1))).apply(lambda x: FRA(Rfix, y, y[0][x], y[0][x+1], P))
+FRAVal          = list(map(lambda x: round(x, 6), [0] + FRAVal.tolist() + [VSwapFRA]))
+DCF_tab         = list(map(lambda x: round(x, 6), DCF + [sum(DCF)]))
 
 values = [Maturity_tab, FixBondCashFlow, FloatRateNote, BondBasedVal, FRAVal, DCF_tab]
 
@@ -115,7 +114,7 @@ trace0 = go.Table(
   ),
   cells = dict(
     values = values,
-    fill = dict(color = [list(np.repeat('white',len(Maturity))) + ['lightgrey']]),
+    fill = dict(color = [list(np.repeat('white', len(Maturity))) + ['lightgrey']]),
     align = ['center'],
     height = 30,
     font = dict(color = '#506784', size = 12)
