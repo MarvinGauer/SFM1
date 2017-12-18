@@ -4,7 +4,7 @@ Published in:       'Statistics of Financial Markets 1 - Student Project - Compa
 
 Description:        Calculates the value of an IRS based on a Bond, FRA and Forward Rate approach.
 
-Keywords:           finance, derivatives, interest rates, swaps
+Keywords:           finance, derivative, interest rates, swaps
 
 Author:             Marvin Gauer, Laureen Lake
 
