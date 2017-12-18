@@ -11,8 +11,8 @@ import plotly.graph_objs as go
 ######## 1.Input Parameters
 
 Rfix     = 0.075 # Fixed Rate
-Maturity = [0, 0.5, 1, 1.5, 2, 2.5]
-Yields   = [0, 2 * (1/0.97) - 2, (1/0.94) - 1, ((1/0.91) - 1)/3 * 2, ((1/0.87) - 1)/2, 0.08]
+Maturity = [0, 0.5, 1, 1.5, 2]
+Yields   = [0, 0.06185567, 0.06382979, 0.06593407, 0.07471264]
 
 y = [Maturity, Yields]
 P = 10 # Principal
