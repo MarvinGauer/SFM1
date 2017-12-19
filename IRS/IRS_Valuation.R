@@ -1,4 +1,4 @@
-############################################################################ SFM1 - Project -> Compare the three different ways to value an IRS
+##### SFM1 - Project -> Compare the three different ways to value an IRS
 
 # clear all variables
 rm(list = ls(all = TRUE))
