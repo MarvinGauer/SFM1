@@ -1,0 +1,383 @@
+\PassOptionsToPackage{english}{babel}
+
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\usepackage{mathrsfs}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{bbm}
+\usepackage{cooltooltips}
+\usepackage{colordef}
+\usepackage{beamerdefs}
+\usepackage{lvblisting}
+\usepackage{textcomp}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{fix-cm}
+\usepackage{fourier}
+\usetikzlibrary{shapes,arrows}
+
+\pgfdeclareimage[height=3.5cm]{logobig}{hulogo}
+\pgfdeclareimage[height=0.7cm]{logosmall}{Bild1}
+
+\renewcommand{\titlescale}{1.0}
+\renewcommand{\titlescale}{1.0}
+\renewcommand{\leftcol}{0.6}
+
+\title[]{Compare three different ways to value an IRS}
+\authora{Laureen Lake \\ Marvin Gauer}
+\authorb{}
+\authorc{}
+
+\def\linka{}
+\def\linkb{}
+\def\linkc{}
+
+\institute{Statistics of Financial Markets 1\\Humboldt--Universit\"at zu Berlin 
+}
+
+\hypersetup{pdfpagemode=FullScreen}
+
+\begin{document}
+\selectlanguage{english}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame[plain]{
+\titlepage
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Table of Contents}
+\frame{
+\frametitle{Table of Contents}
+\begin{columns}
+    \column{0.40\linewidth}
+	\begin{itemize}
+    \vspace{-1.0cm}
+	\item Motivation
+    \item Assumptions
+    \item Interest Rate Swaps 
+	\item Forward Rates 
+    \item Forward Rate Agreements
+    \item Valuation of Interest Rate Swaps
+    \item Code in R \& Python
+	\end{itemize}
+  
+    \column{0.50\linewidth}
+    \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{"Bild1".jpg}
+    
+    \end{figure}
+    \end{columns}  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivation}
+\frame{
+\frametitle{Motivation} 
+Interest Rate Swaps (IRS) are the most actively non-exchange-traded (OTC) derivatives. According to the Bank of International Settlement they make up to $58.5\%$ of all OTC derivative trades.\\[2ex]
+Below are some of the main reasons for companies to enter into an IRS:
+\begin{itemize}
+	\item[+] Hedging risk of unfavorable interest rate fluctuations 
+    \item[+] Cost reduction of a loan
+    \item[+] Reduction of uncertainty of future cash flows
+\end{itemize}
+}
+% 1-1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Assumptions}
+\frame{
+\frametitle{Assumptions}
+The following assumptions are made in the course of the preceeding slides:\\[2ex]
+\begin{itemize}
+	\item For simplicity, the Principal amount is set to 1 \\[1ex]
+    \item Simple compounding interest rates are used \\[1ex]
+    \item The valuations are based on positions in where we receive the fixed rate, so called Receiver Interest Rate Swaps
+\end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interest Rate Swaps}
+\frame{
+\frametitle{Interest Rate Swaps}
+Definition: A \textbf{Plain Vanilla Interest Rate Swap} (IRS) is an agreement between two parties to exchange payments of a fixed rate against a floating rate over a predetermined period of time at specific time points\\[1ex]
+\begin{itemize}	
+\item[\textcolor{black}\danger] Only exchange of streams of interest payments, no exchange of underlying principal amounts!
+\end{itemize}
+
+\begin{itemize}
+\item receiver IRS (RIRS): fixed rate is received \& floating rate is paid \\[1ex]
+\item payer IRS (PIRS): fixed rate is paid \& floating rate is received
+
+\end{itemize}
+}
+\frame{
+\textbf{Example:} \\[2ex]
+Initial situation before the IRS:\\[1ex]
+\begin{itemize}
+\item VW is currently paying a fixed rate of 5.5\% but wishes to pay a floating rate \\[1ex]
+\item Daimler is currently paying a floating rate of LIBOR + 1.5\% but wishes to pay a fixed rate
+\end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\vspace{0.5cm}
+Initial situation visualized:\\[3ex]
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{box} = [rectangle, draw, 
+    text width=5em, text centered, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, node distance=2.5cm,
+    minimum height=2em]
+\tikzstyle{Net} = [rectangle, node distance=1cm,
+    minimum height=2em]
+    
+\begin{center}    
+\begin{tikzpicture}[scale=0.8, every node/.style={transform shape},node distance = 4cm, auto]
+    % Place nodes
+    \node [box] (bank) {Bank};
+    \node [block, left of=bank] (A) {Volkswagen};
+    \node [block, right of=bank] (B) {Daimler};
+    \node [cloud, below of=A] (Fix) {Fix};
+    \node [cloud, below of=B] (Float) {Floating};
+%    \node [Net, below of=Fix] (NET A) {\textcolor{darkgreen}{NET: LIBOR + 1.5\%}};
+%    \node [Net, below of=Float] (NET B) {\textcolor{darkgreen}{NET: 5.5\%}};
+    
+    % Draw edges
+    \path [line] (A) -- (Fix) node[draw=none, midway, right=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5.5\%}};
+    \path [line] (B) -- (Float) node[draw=none, midway, left=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1.5\%}};
+%    \path [line] ([yshift=1ex]A.east) -- ([yshift=1ex]bank.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+%    \path [line] ([yshift=-1ex]bank.west) -- ([yshift=-1ex]A.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+%    \path [line] ([yshift=1ex]bank.east) -- ([yshift=1ex]B.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+%    \path [line] ([yshift=-1ex]B.west) -- ([yshift=-1ex]bank.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+
+\end{tikzpicture}
+\end{center}  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\vspace{0.5cm}
+Both companies go to an intermediating bank in order to set up a swap:\\[3ex]
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{box} = [rectangle, draw, 
+    text width=5em, text centered, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, node distance=2.5cm,
+    minimum height=2em]
+\tikzstyle{Net} = [rectangle, node distance=1cm,
+    minimum height=2em]
+    
+\begin{center}    
+\begin{tikzpicture}[scale=0.8, every node/.style={transform shape},node distance = 4cm, auto]
+    % Place nodes
+    \node [box] (bank) {Bank};
+    \node [block, left of=bank] (A) {Volkswagen};
+    \node [block, right of=bank] (B) {Daimler};
+    \node [cloud, below of=A] (Fix) {Fix};
+    \node [cloud, below of=B] (Float) {Floating};
+%   \node [Net, below of=Fix] (NET A) {\textcolor{darkgreen}{NET: LIBOR + 1.5\%}};
+%    \node [Net, below of=Float] (NET B) {\textcolor{darkgreen}{NET: 5.5\%}};
+    
+    % Draw edges
+    \path [line] (A) -- (Fix) node[draw=none, midway, right=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5.5\%}};
+    \path [line] (B) -- (Float) node[draw=none, midway, left=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1.5\%}};
+    \path [line] ([yshift=1ex]A.east) -- ([yshift=1ex]bank.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+    \path [line] ([yshift=-1ex]bank.west) -- ([yshift=-1ex]A.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+    \path [line] ([yshift=1ex]bank.east) -- ([yshift=1ex]B.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+    \path [line] ([yshift=-1ex]B.west) -- ([yshift=-1ex]bank.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+
+\end{tikzpicture}
+\end{center}  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\vspace{0.5cm}
+Final payment structure for the companies loans:\\[3ex]
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{box} = [rectangle, draw, 
+    text width=5em, text centered, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, node distance=2.5cm,
+    minimum height=2em]
+\tikzstyle{Net} = [rectangle, node distance=1cm,
+    minimum height=2em]
+    
+\begin{center}    
+\begin{tikzpicture}[scale=0.8, every node/.style={transform shape},node distance = 4cm, auto]
+    % Place nodes
+    \node [box] (bank) {Bank};
+    \node [block, left of=bank] (A) {Volkswagen};
+    \node [block, right of=bank] (B) {Daimler};
+    \node [cloud, below of=A] (Fix) {Fix};
+    \node [cloud, below of=B] (Float) {Floating};
+    \node [Net, below of=Fix] (NET A) {\textcolor{darkgreen}{NET: LIBOR + 1.5\%}};
+    \node [Net, below of=Float] (NET B) {\textcolor{darkgreen}{NET: 5.5\%}};
+    
+    % Draw edges
+    \path [line] (A) -- (Fix) node[draw=none, midway, right=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5.5\%}};
+    \path [line] (B) -- (Float) node[draw=none, midway, left=1pt, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1.5\%}};
+    \path [line] ([yshift=1ex]A.east) -- ([yshift=1ex]bank.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+    \path [line] ([yshift=-1ex]bank.west) -- ([yshift=-1ex]A.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+    \path [line] ([yshift=1ex]bank.east) -- ([yshift=1ex]B.west) node[midway, above, font=\fontsize{8}{8}\selectfont]{\textcolor{red}{LIBOR + 1\%}};
+    \path [line] ([yshift=-1ex]B.west) -- ([yshift=-1ex]bank.east) node[midway, below, font=\fontsize{8}{8}\selectfont]{\textcolor{blue}{5\%}};
+
+\end{tikzpicture}
+\end{center}  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Forward Rates}
+\frame{
+\frametitle{Forward Rates}
+Definition: A \textbf{Forward Rate} is an interest rate applicable to a financial transaction that will take place in the future.\newline
+\\
+Due to arbitrage free investments the Forward Rate is implied in the Yield Curve and the following must hold ($where\ S\leq T$):
+\begin{equation*}
+\overbrace{(1+r_{S}S)}^{\substack{Interest\ on\\ an\ Investment \\ from\ 0\ to\ S} } \cdot \underbrace{[1+F(0,S,T)(T-S)]}_{\substack{Interest\ on\ an\ Investment \\ from\ S\ to\ T} }=\overbrace{(1+r_{T}T)}^{\substack{ Interest\ on\\ an\ Investment\\ from\ 0\ to\ T}}
+\end{equation*}
+}
+
+\frame{
+%\frametitle{Forward Rates}
+\vspace{-1cm}
+\begin{equation*}
+\Rightarrow F(0,S,T) = \frac{1}{(T-S)} \cdot \left(\frac{1+r_{T}T}{1+r_{S}S} - 1 \right) = \frac{1}{(T-S)} \cdot \left(\frac{V(0,S)}{V(0,T)} - 1 \right)
+\end{equation*}
+where $V(0,S) = \frac{1}{1+r_{S}S}$ and $V(0,T) = \frac{1}{1+r_{T}T}$. \\[5ex]
+Since the Principal is set to 1, $V(0,S)$ and $V(0,T)$ can be thought of as Discount Factors or in more general (when $P\neq 1$) as prizes of \textbf{Zero-Coupon-Bonds} with maturity in S respectively T years.
+
+\vspace{0.5cm}\hspace{7.5cm}\href{https://github.com/MarvinGauer/SFM1}{\includegraphics[scale=0.04]{qletlogo.pdf}IRS Valuation}
+
+}
+\section{Forward Rate Agreements}
+\frame{
+\frametitle{Forward Rate Agreements}
+Definition: A \textbf{Forward Rate Agreement} (FRA) is an agreement that a certain fixed interest rate will apply to a principal amount for a certain period of time, in exchange for an interest rate payment at the future interest rate.\\[3ex]
+
+\tikzstyle{line} = [draw, -latex']
+\begin{tikzpicture}[to/.style={->,>=stealth',shorten >=1pt,semithick,font=\sffamily\footnotesize}]
+    % draw horizontal line   
+    \path [line] (0,0) -- (10.5,0) ;
+    \draw (5,0.5) -- (10, 0.5) node[draw=none,fill=none,midway,above] {$R_{fix}$};
+    \draw [bend left=20,blue,-latex]  (10,0) to node[below, font=\fontsize{10}{10}\selectfont]{discounted from T to timepoint 0} (0,0);
+
+
+    % draw vertical lines
+    \foreach \x in {0,5,10}
+      \draw (\x cm,3pt) -- (\x cm,-3pt);
+    \draw (5,0.5cm+3pt) -- (5,0.5cm-3pt);
+	\draw (10,0.5cm+3pt) -- (10,0.5cm-3pt);
+    
+    % draw nodes
+    \draw (0,0) node[below=3pt] {$ 0 $};
+    \draw (5,0) node[below=3pt] {$ S $};
+    \draw (10,0) node[below=3pt] {$ T $};
+\end{tikzpicture}
+
+}
+\frame{
+\vspace{0.5cm}
+Current \textbf{value of a FRA} paid-in-arrear $\widehat{=}$ discounted value of the payoff received at time T:
+\begin{align*}
+FRA_{R_{fix}, S, T}\{R(t), t\}\; &= (1+R(0,T) \cdot T)^{-1} \cdot \overbrace{(T-S) \cdot (R_{fix}-R(S,T))}^{Net\ payoff} \\[1ex]
+&= V(0,T) \cdot (1+R_{fix} \cdot (T-S))-(1+R(0,S) \cdot S )^{-1} \\[1ex]
+&= \; V(0,T) \cdot (T-S) \cdot R_{fix} \; + \; V(0,T) - V(0,S) 
+\end{align*}
+\vspace{0.5cm}\hspace{7.5cm}\href{https://github.com/MarvinGauer/SFM1}{\includegraphics[scale=0.04]{qletlogo.pdf}IRS Valuation}
+\begin{itemize}
+\item $R_{fix}$ - fixed interest rate specified in the agreement \\[1ex]
+\item $R(S,T)$ - future interest rate over the time period T-S \\[1ex]
+\item $V(0,T) \; = \; \frac{1}{1+r_T \cdot T}$ - discount factor of a cashflow at time T where $r_T$ ist the spot rate until time T\\[2ex]
+\end{itemize}
+}
+\section{Valuation of Interest Rate Swaps}
+\frame{
+\frametitle{Valuation of Interest Rate Swaps}
+There are 3 different approaches for valuing an IRS, which are based on: \\[2ex]
+\begin{itemize}
+	\item Valuation and discounting of future cash flows\\[1ex]
+    \item Considering a Portfolio of Forward Rate Agreements (FRA)\\[1ex]
+    \item Valuing a Coupon and Floating Rate Bond
+\end{itemize}
+}
+
+\frame{
+\frametitle{Valuation of Interest Rate Swaps - Cash Flow Approach}
+\vspace{-0.5cm}
+\begin{equation*}
+RIRS_{R_{fix},T}\{R(t), t\} = \sum_{i=0}^{n-1} \overbrace{ V(0,t_{i+1})}^{
+\substack{\tiny Discount \ Factor\ of \\ \tiny period\ 0\ to\ t_{i+1}}
+}\underbrace{(t_{i+1}-t_i)(R_{fix}-F(0,t_i,t_{i+1}))}_{\tiny Net\ Payment\ of\ period\ t_i\ to\ t_{i+1}}
+\end{equation*}	
+where $t_1,...,t_n$ are the dates when the payments are exchanged and $t_0=0$ \& $t_n=T$. \\[1ex]
+\vspace{1.5cm}\hspace{7.5cm}\href{https://github.com/MarvinGauer/SFM1}{\includegraphics[scale=0.04]{qletlogo.pdf}IRS Valuation}
+
+}
+\frame{
+\frametitle{Valuation of Interest Rate Swaps - FRA Approach}
+For simplicity, a plain vanilla IRS can be thought of as a portfolio of FRAs.
+\begin{equation*}
+RIRS_{R_{fix},T}\{R(t), t\} = \sum_{i=0}^{n-1} FRA_{R_{fix},t_i,t_{i+1}}
+\end{equation*}
+where $t_1,...,t_n$ are the dates when the payments are exchanged and $t_0=0$ \& $t_n=T$.
+\vspace{0.5cm}\hspace{7.5cm}\href{https://github.com/MarvinGauer/SFM1}{\includegraphics[scale=0.04]{qletlogo.pdf}IRS Valuation}
+}
+\frame{
+\frametitle{Valuation of Interest Rate Swaps - Bond Approach}
+A further approach is to consider the fixed leg as a coupon bearing and the floating leg as a floating rate bond.\newline
+\newline
+The coupon bearing bond can be valued in the following way:
+\begin{equation*}
+FixedLeg_{R_K}\{R(t), t\} = \sum_{i=0}^{n-1} \underbrace{V(0,t_{i+1}) \cdot R_K \cdot (t_{i+1}-t_{i})}_{\substack{Present\ Value\ of\ Coupon\\ Payment\ at\ time\ t_{i+1}}} + \overbrace{V(0,T)}^{\substack{Present\ Value\\ of \ the\ Principal}}
+\end{equation*}	
+where $t_1,...,t_n$ are the dates when the payments are exchanged and $t_0=0$ \& $t_n=T$.
+}
+\frame{
+On the reset dates, the floating leg will always be traded at par (at its Principal), since the next coupon is equal to the rate used for discounting. If we consider today as the first reset date it holds that:
+\begin{equation*}
+FloatingLeg = 1
+\end{equation*}
+And thus, the value of the RIRS can be calculated accordingly:
+\begin{equation*}
+RIRS_{R_K,T}\{R(t), t\}=FixedLeg_{R_K}\{R(t), t\} - 1
+\end{equation*}
+\vspace{0.5cm}\hspace{7.5cm}\href{https://github.com/MarvinGauer/SFM1}{\includegraphics[scale=0.04]{qletlogo.pdf}IRS Valuation}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{R simulation}
+\frame{
+\vspace{1.8cm}
+\hspace{4cm}
+%\centering
+\large
+\textbf{\textcolor{red}{\Large R Simulation}}
+\begin{center}
+\danger Code is also available in Python
+\end{center}
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bibliography}
+\frame{
+\frametitle{Bibliography}
+\begin{thebibliography}{10} 
+\bibitem{KWH}\textbf{H\"ardle, W. K., Franke, J. \& Hafner, C. M.} (2015). Statistics of Financial Markets, 4th Edition, Berlin, Springer.
+\bibitem{KWHL}\textbf{Borak, S., H\"ardle, W. K. \& L\'{o}pez-Cabrera, B.} (2013). Statistics of Financial Markets - Exercises \& Solutions, 2nd Edition, Berlin, Springer.
+\end{thebibliography}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
