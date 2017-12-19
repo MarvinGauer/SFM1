@@ -15,7 +15,7 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 Rfix     = 0.075  # Fix Rate
 # Maturities and the corresponding yields
-Maturity = c(0, 0.5, 1, 1.5, 2)
+Maturity = c(0.0, 0.5, 1.0, 1.5, 2.0)
 Yields   = c(0, 0.06185567, 0.06382979, 0.06593407, 0.07471264)  # Yields corresponding to the maturities
 
 y        = data.frame(Maturity, Yields)  # zero-bond-yield-curve
@@ -76,7 +76,7 @@ VSwapR = sum(DCF)
 
 ######## 3. Results
 
-Results = data.frame(Maturity = c(Maturity, "Results:"), 
+Results = data.frame(`Maturity` = c(format(round(Maturity,2), nsmall = 1), "Results:"), 
                      `Fixed Bond Cash Flows` = round(c(Bfix(y, Rfix, P)$PV, Bfix(y, Rfix, P)$BondPrice), 5),
                      `Floating Rate Note` = c(P, rep("", length(Maturity) - 1), P), 
                      `Bond based Value` = c(rep("", length(Maturity)), round(Bfix(y, Rfix, P)$BondPrice - P, 5)), 
@@ -85,6 +85,7 @@ Results = data.frame(Maturity = c(Maturity, "Results:"),
 
 
 g          = tableGrob(head(Results, n = nrow(Results)), theme = ttheme_minimal(), rows = NULL)
+
 separators = replicate(ncol(g) - 1, segmentsGrob(x1 = unit(0, "npc"), gp = gpar(lty = 2)), simplify = FALSE)
 
 # add vertical lines on the left side of columns (after 2nd)
