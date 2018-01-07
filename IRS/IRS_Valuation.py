@@ -94,18 +94,17 @@ VSwapR = sum(DCF)
 ######## 3. Results
 
 # Creation of the Columns of the printed table
-Maturity_tab    = Maturity + ['Results:']
-FixBondCashFlow = list(map(lambda x: round(x, 6), list(Bfix(y, Rfix, P)[1]) + [Bfix(y, Rfix, P)[0]]))
+Maturity_tab    = [format(x, '.1f') for x in Maturity] + ['Results:']
+FixBondCashFlow = [format(x, '.5f') for x in list(map(lambda x: round(x, 6), list(Bfix(y, Rfix, P)[1]) + [Bfix(y, Rfix, P)[0]]))]
 FloatRateNote   = [P] + list(np.repeat('', len(Maturity) - 1)) + [P]
 BondBasedVal    = list(np.repeat('', len(Maturity))) + [round(Bfix(y, Rfix, P)[0] - P, 6)]
 FRAVal          = pd.Series(list(np.arange(0, len(y[0])-1))).apply(lambda x: FRA(Rfix, y, y[0][x], y[0][x+1], P))
-FRAVal          = list(map(lambda x: round(x, 6), [0] + FRAVal.tolist() + [VSwapFRA]))
-DCF_tab         = list(map(lambda x: round(x, 6), DCF + [sum(DCF)]))
+FRAVal          = [format(x, '.5f') for x in list(map(lambda x: round(x, 6), [0] + FRAVal.tolist() + [VSwapFRA]))]
+DCF_tab         = [format(x, '.5f') for x in list(map(lambda x: round(x, 6), DCF + [sum(DCF)]))]
 
 
 # Creates the table based on the columns defined above
 x       = PrettyTable()
-x.align = "r"
 
 x.add_column('Maturity', Maturity_tab)
 x.add_column('Fixed Bond', FixBondCashFlow)
@@ -113,5 +112,7 @@ x.add_column('Floating Rate Note', FloatRateNote)
 x.add_column('Bond based Value', BondBasedVal)
 x.add_column('FRA based Value', FRAVal)
 x.add_column('DCF based Value', DCF_tab)
+
+x.align = "r"
 
 print(x)

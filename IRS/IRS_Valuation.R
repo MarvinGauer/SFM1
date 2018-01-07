@@ -20,7 +20,7 @@ Yields   = c(0, 0.06185567, 0.06382979, 0.06593407, 0.07471264)  # Yields corres
 
 y        = data.frame(Maturity, Yields)  # zero-bond-yield-curve
 
-P        = 1  # Principal
+P        = 10  # Principal
 
 ######## 2. Valuation
 
